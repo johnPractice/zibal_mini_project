@@ -4,7 +4,9 @@ from rest_framework import status
 from interaction.serializers import TransactionSerializer
 from interaction.models import Transaction
 from interaction.utils.calc_weak_number import week_number_of_month
-from utils.global_error_handling.custom_error import BadRequestInput, ServiceUnAvailable
+from utils.global_error_handling.custom_error import BadRequestInput
+from interaction.utils.global_storage import get_value, set_item
+import pickle
 # 3 type for report
 # daily --weakly -- monthly
 
@@ -15,41 +17,59 @@ def remove_key_value(dic, key):
     return dic
 
 
+def represent_result(data, mode, weak):
+    result = {}
+    for d in data:
+        key_dic = f"{d['key'].year}/{d['key'].month}"
+        key_dic = key_dic + \
+            f"--{week_number_of_month(d['key'])}" if weak is True else key_dic
+        if key_dic not in result:
+            result.update({key_dic: d[mode]})
+        else:
+            result[key_dic] += d[mode]
+    return result
+
+
 def daily_report(merchant_id, mode):
+    get_data = get_value(f'{merchant_id}-daily')
+    if get_data is not None:
+        return{'type': 'daily',
+               'report': [remove_key_value(data, mode) for data in get_data]}
     transactions = Transaction.get_daily_transaction(merchant_id)
     transactions_serializers = TransactionSerializer(
         transactions, many=True)
-
+    data = transactions_serializers.data
+    set_item(f'{merchant_id}-daily', data)
     return{'type': 'daily',
-           'report': [remove_key_value(data, mode) for data in transactions_serializers.data]}
+           'report': [remove_key_value(data, mode) for data in data]}
 
 
 def weakly_report(merchant_id, mode):
+    get_data = get_value(f'{merchant_id}-weakly')
+    if get_data is not None:
+        return{'type': 'weakly',
+               'report': represent_result(get_data, mode, True)}
     transactions = Transaction.get_daily_transaction(merchant_id)
     transactions_serializers = TransactionSerializer(
         transactions, many=True)
-    result = {}
-    for data in transactions_serializers.data:
-        key_dic = f"{data['key'].year}/{data['key'].month}--{week_number_of_month(data['key'])}"
-        if key_dic not in result:
-            result.update({key_dic: data[mode]})
-        else:
-            result[key_dic] += data[mode]
+    data = transactions_serializers.data
+    set_item(f'{merchant_id}-weakly', data)
+    result = represent_result(data, mode, True)
     return{'type': 'weakly',
            'report': result}
 
 
 def monthly_report(merchant_id, mode):
+    get_data = get_value(f'{merchant_id}-monthly')
+    if get_data is not None:
+        return{'type': 'monthly',
+               'report': represent_result(get_data, mode, False)}
     transactions = Transaction.get_daily_transaction(merchant_id)
     transactions_serializers = TransactionSerializer(
         transactions, many=True)
-    result = {}
-    for data in transactions_serializers.data:
-        key_dic = f"{data['key'].year}/{data['key'].month}"
-        if key_dic not in result:
-            result.update({key_dic: data[mode]})
-        else:
-            result[key_dic] += data[mode]
+    data = transactions_serializers.data
+    set_item(f'{merchant_id}-monthly', data)
+    result = represent_result(data, mode, False)
     return{'type': 'monthly',
            'report': result}
 
