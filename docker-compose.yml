@@ -1,0 +1,21 @@
+version: "3"
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+services:
+  db:
+    image: "mongo:4.0.4"
+    restart: always
+    ports:
+      - 27017:27017
+  zibal-services:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    links:
+      - db

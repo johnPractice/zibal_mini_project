@@ -1,0 +1,85 @@
+{
+	"info": {
+		"_postman_id": "3e93420f-8f44-4f33-b990-fd1f943dce01",
+		"name": "Zibal Mini Project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Test Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{local-url}}/test/hello",
+					"host": [
+						"{{local-url}}"
+					],
+					"path": [
+						"test",
+						"hello"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Report",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{local-url}}/interaction/report?merchantId=1&type=monthly&mode=count",
+					"host": [
+						"{{local-url}}"
+					],
+					"path": [
+						"interaction",
+						"report"
+					],
+					"query": [
+						{
+							"key": "merchantId",
+							"value": "1"
+						},
+						{
+							"key": "type",
+							"value": "monthly"
+						},
+						{
+							"key": "mode",
+							"value": "count"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "local-url",
+			"value": "localhost:8000"
+		}
+	]
+}
