@@ -30,6 +30,7 @@ class Transaction(models.Model):
     def get_daily_transaction(merchent):
         try:
             return Transaction.objects.filter(merchantId=merchent)
+            # filter(merchantId=merchent).('create_date')
         except Exception as e:
             # TODO: raise custom error
             return[]

@@ -9,12 +9,34 @@ from interaction.utils.global_storage import get_value, set_item
 import pickle
 # 3 type for report
 # daily --weakly -- monthly
+MODE_VALID_VALUE = ['value', 'count']
+
+
+# TODO:can check thie better :)
+def check_data(data):
+    result = []
+    for d in data:
+        check = False
+        for r in result:
+            if r['key'] == d['key']:
+                check = True
+        if check is True:
+            for r in result:
+                if r['key'] == d['key']:
+                    if 'value' in d:
+                        r['value'] = r['value']+d['value']
+                    if 'count' in d:
+                        r['count'] = r['count']+d['count']
+        else:
+            result.append(d)
+    return result
 
 
 def remove_key_value(dic, key):
-    if key in dic:
-        dic.pop(key)
-    return dic
+    result = {}
+    for k in key:
+        result.update({k: dic[k]})
+    return result
 
 
 def represent_result(data, mode, weak):
@@ -32,6 +54,10 @@ def represent_result(data, mode, weak):
 
 def daily_report(merchant_id, mode):
     get_data = get_value(f'{merchant_id}-daily')
+    if mode == 'count':
+        mode = ['count', 'key']
+    else:
+        mode = ['value', 'key']
     if get_data is not None:
         return{'type': 'daily',
                'report': [remove_key_value(data, mode) for data in get_data]}
@@ -39,6 +65,8 @@ def daily_report(merchant_id, mode):
     transactions_serializers = TransactionSerializer(
         transactions, many=True)
     data = transactions_serializers.data
+
+    data = check_data(data)
     set_item(f'{merchant_id}-daily', data)
     return{'type': 'daily',
            'report': [remove_key_value(data, mode) for data in data]}
@@ -84,7 +112,6 @@ switch_type = {
 class GetReport(APIView):
     def get(self, request):
         try:
-            MODE_VALID_VALUE = ['value', 'count']
             merchant_id = request.query_params.get('merchantId') or None
             type_parameter = request.query_params.get('type') or None
             mode_parameter = request.query_params.get('mode') or None

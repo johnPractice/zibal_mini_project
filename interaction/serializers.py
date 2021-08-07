@@ -18,4 +18,4 @@ class TransactionSerializer(serializers.ModelSerializer):
         return obj.price
 
     def get_count(self, obj):
-        return Transaction.objects.filter(create_date=obj.create_date).count()
+        return Transaction.objects.filter(merchantId=obj.merchantId, create_date=obj.create_date).count()
