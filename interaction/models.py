@@ -1,7 +1,5 @@
 from django.db import models
-import datetime
-import django
-
+from utils.global_error_handling.custom_error import ServiceUnAvailable
 # Create your models here.
 # think simple
 # this model is just record the transction for user who have gateway
@@ -29,8 +27,10 @@ class Transaction(models.Model):
     @staticmethod
     def get_daily_transaction(merchent):
         try:
+            if merchent is None:
+                return Transaction.objects.all()
             return Transaction.objects.filter(merchantId=merchent)
-            # filter(merchantId=merchent).('create_date')
+
         except Exception as e:
-            # TODO: raise custom error
-            return[]
+            print(e)
+            raise ServiceUnAvailable()

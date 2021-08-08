@@ -115,7 +115,7 @@ class GetReport(APIView):
             merchant_id = request.query_params.get('merchantId') or None
             type_parameter = request.query_params.get('type') or None
             mode_parameter = request.query_params.get('mode') or None
-            if merchant_id is None or mode_parameter is None or merchant_id is None:
+            if type_parameter is None or mode_parameter is None:
                 raise BadRequestInput(
                     detail={'message': 'enter essentioal thing'})
             if mode_parameter not in MODE_VALID_VALUE:
